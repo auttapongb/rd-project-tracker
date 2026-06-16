@@ -22,7 +22,16 @@ npm run dev
 
 Open http://localhost:3000
 
-Data: static seed (replace with sheet CSV export for exact parity). Atlassian sync = Milestone 2.
+### Import / refresh from Google Sheet
+
+```bash
+cd web
+npm run import:sheet    # reads data/csv-raw/workbook.xlsx or fetches live via gviz
+```
+
+Use **Re-import sheet** in the UI to refresh without restarting dev server.
+
+Data files land in `web/public/data/` and `data/csv/`.
 
 ## Stack
 

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "projects",
+    "label": "Projects",
+    "file": "projects.json",
+    "rows": 21,
+    "cols": 101
+  },
+  {
+    "id": "sprint-resource",
+    "label": "Sprint Resource",
+    "file": "sprint-resource.json",
+    "rows": 1066,
+    "cols": 19
+  },
+  {
+    "id": "resource-allocate",
+    "label": "Resource Allocate",
+    "file": "resource-allocate.json",
+    "rows": 230,
+    "cols": 18
+  },
+  {
+    "id": "summarize-sprint-26",
+    "label": "Summarize Sprint 26",
+    "file": "summarize-sprint-26.json",
+    "rows": 958,
+    "cols": 6
+  },
+  {
+    "id": "sprint-26",
+    "label": "Sprint 26",
+    "file": "sprint-26.json",
+    "rows": 2004,
+    "cols": 34
+  },
+  {
+    "id": "summarize-sprint-25",
+    "label": "Summarize Sprint 25",
+    "file": "summarize-sprint-25.json",
+    "rows": 958,
+    "cols": 6
+  },
+  {
+    "id": "sprint-25",
+    "label": "Sprint 25",
+    "file": "sprint-25.json",
+    "rows": 2004,
+    "cols": 34
+  }
+]
