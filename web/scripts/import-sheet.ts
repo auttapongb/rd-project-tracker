@@ -59,11 +59,19 @@ async function fetchGvizCsv(sheetName: string): Promise<string[][]> {
 
 function normalizeRows(rows: string[][]): string[][] {
   const maxCols = Math.max(...rows.map((r) => r.length), 0);
-  return rows.map((r) => {
+  let normalized = rows.map((r) => {
     const row = [...r];
     while (row.length < maxCols) row.push("");
     return row.map((c) => String(c ?? "").trim());
   });
+  while (normalized.length > 0 && !rowHasData(normalized[normalized.length - 1])) {
+    normalized.pop();
+  }
+  return normalized;
+}
+
+function rowHasData(row: string[]): boolean {
+  return row.some((c) => c !== "");
 }
 
 function findSelectColumns(headerRow: string[], names: string[]): number[] {

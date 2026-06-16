@@ -3,37 +3,13 @@
 import clsx from "clsx";
 import { LayoutGrid, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { ExcelStyleTimeline } from "@/components/ExcelStyleTimeline";
 import { ImportedSpreadsheet, type ImportedTab } from "@/components/ImportedSpreadsheet";
-import { GanttChart } from "@/components/GanttChart";
-import type { SheetTab } from "@/types/sheet";
+import { SheetToolbar, type SheetViewMode } from "@/components/SheetToolbar";
+import { SprintTimeline } from "@/components/SprintTimeline";
+import { colLetter } from "@/lib/sheet-utils";
 
 type ManifestEntry = { id: string; label: string; file: string; rows: number; cols: number };
-
-function toGanttTab(tab: ImportedTab): SheetTab | null {
-  if (!tab.id.startsWith("sprint-") || tab.id.includes("summarize")) return null;
-  const header = tab.rawRows[0] ?? [];
-  const summaryIdx = header.findIndex((h) => h.toLowerCase() === "summary");
-  const createdIdx = header.findIndex((h) => h.toLowerCase() === "created");
-  const dueIdx = header.findIndex((h) => h.toLowerCase() === "due date");
-  const keyIdx = header.findIndex((h) => h.toLowerCase() === "issue key");
-  if (summaryIdx < 0 || createdIdx < 0 || dueIdx < 0) return null;
-
-  const rows = tab.rawRows.slice(tab.headerRows).map((row, i) => ({
-    key: row[keyIdx] ?? i,
-    summary: row[summaryIdx] ?? "",
-    start: row[createdIdx] ?? "",
-    end: row[dueIdx] ?? "",
-    progress: 50,
-  }));
-
-  return {
-    id: tab.id,
-    label: tab.label,
-    columns: [],
-    rows,
-    gantt: { taskField: "summary", startField: "start", endField: "end", progressField: "progress" },
-  };
-}
 
 export function Dashboard() {
   const [manifest, setManifest] = useState<ManifestEntry[]>([]);
@@ -41,6 +17,14 @@ export function Dashboard() {
   const [tabData, setTabData] = useState<ImportedTab | null>(null);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [hideEmpty, setHideEmpty] = useState(true);
+  const [zoom, setZoom] = useState(1);
+  const [viewMode, setViewMode] = useState<SheetViewMode>("split");
+  const [selected, setSelected] = useState<{ r: number; c: number } | null>(null);
+
+  const isSprintTab = activeId === "sprint-26" || activeId === "sprint-25";
 
   useEffect(() => {
     fetch("/data/manifest.json")
@@ -55,6 +39,9 @@ export function Dashboard() {
   useEffect(() => {
     if (!activeId) return;
     setLoading(true);
+    setSearch("");
+    setSelected(null);
+    setViewMode(activeId === "sprint-26" || activeId === "sprint-25" ? "split" : "grid");
     fetch(`/data/${activeId}.json`)
       .then((r) => r.json())
       .then(setTabData)
@@ -74,55 +61,99 @@ export function Dashboard() {
     }
   }, [activeId]);
 
-  const ganttTab = tabData ? toGanttTab(tabData) : null;
+  const selectedLabel = selected ? `${colLetter(selected.c)}${selected.r + 1}` : null;
+  const cellValue = selected && tabData ? (tabData.rawRows[selected.r]?.[selected.c] ?? "") : "";
 
   if (loading && !tabData) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-[#5f6368]">Loading sheet data…</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa] text-sm text-[#5f6368]">
+        Loading sheet data…
+      </div>
+    );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f9fa]">
-      <header className="flex items-center justify-between border-b border-[#dadce0] bg-white px-4 py-3 shadow-sm">
+    <div className="flex h-screen flex-col bg-[#e8eaed]">
+      <header className="flex shrink-0 items-center justify-between border-b border-[#dadce0] bg-white px-4 py-2.5 shadow-sm">
         <div className="flex items-center gap-2">
-          <LayoutGrid className="h-5 w-5 text-[#188038]" />
+          <div className="flex h-8 w-8 items-center justify-center rounded bg-[#188038]">
+            <LayoutGrid className="h-4 w-4 text-white" />
+          </div>
           <div>
-            <h1 className="text-base font-semibold text-[#202124]">RD Project Tracker</h1>
-            <p className="text-xs text-[#5f6368]">Imported from Google Sheet CSV · {manifest.length} tabs</p>
+            <h1 className="text-sm font-semibold text-[#202124]">RD Project Tracker</h1>
+            <p className="text-[10px] text-[#5f6368]">
+              Sheet parity · FortuneSheet-ready · Jira sync next
+            </p>
           </div>
         </div>
         <button
           type="button"
           onClick={handleReimport}
           disabled={importing}
-          className="flex items-center gap-1 rounded border border-[#dadce0] px-2 py-1 text-xs text-[#5f6368] hover:bg-[#f1f3f4] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-full border border-[#dadce0] bg-white px-3 py-1.5 text-xs font-medium text-[#5f6368] shadow-sm hover:bg-[#f1f3f4] disabled:opacity-50"
         >
           <RefreshCw className={clsx("h-3.5 w-3.5", importing && "animate-spin")} />
           {importing ? "Importing…" : "Re-import sheet"}
         </button>
       </header>
 
-      <nav className="flex gap-0 overflow-x-auto border-b border-[#dadce0] bg-[#e8eaed] px-2 pt-1">
+      <nav className="flex shrink-0 gap-0 overflow-x-auto border-b border-[#dadce0] bg-[#e8eaed] px-1 pt-1">
         {manifest.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveId(tab.id)}
             className={clsx(
-              "sheet-tab shrink-0 rounded-t px-3 py-2 text-xs font-medium",
-              activeId === tab.id ? "bg-white text-[#188038] shadow-sm" : "text-[#5f6368] hover:bg-[#f1f3f4]",
+              "sheet-tab shrink-0 rounded-t-md px-3 py-2 text-xs font-medium transition-all",
+              activeId === tab.id
+                ? "bg-white text-[#188038] shadow-sm"
+                : "text-[#5f6368] hover:bg-white/60",
             )}
           >
             {tab.label}
-            <span className="ml-1 text-[10px] opacity-60">{tab.rows}×{tab.cols}</span>
           </button>
         ))}
       </nav>
 
-      <main className="flex-1 p-4">
+      {tabData ? (
+        <SheetToolbar
+          tabLabel={tabData.label}
+          rowCount={tabData.rawRows.length}
+          colCount={tabData.columnWidths.length}
+          search={search}
+          onSearchChange={setSearch}
+          hideEmpty={hideEmpty}
+          onHideEmptyChange={setHideEmpty}
+          zoom={zoom}
+          onZoomChange={setZoom}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          showTimelineToggle={isSprintTab}
+          selectedCell={selectedLabel}
+          cellValue={cellValue}
+        />
+      ) : null}
+
+      <main className="flex min-h-0 flex-1 flex-col gap-3 p-3">
         {tabData ? (
           <>
-            <ImportedSpreadsheet key={tabData.id} tab={tabData} />
-            {ganttTab ? <GanttChart tab={ganttTab} /> : null}
+            {(viewMode === "grid" || viewMode === "split") && (
+              <ImportedSpreadsheet
+                key={`${tabData.id}-${search}-${hideEmpty}`}
+                tab={tabData}
+                zoom={zoom}
+                search={search}
+                hideEmpty={hideEmpty}
+                selected={selected}
+                onSelect={setSelected}
+              />
+            )}
+            {isSprintTab && (viewMode === "timeline" || viewMode === "split") && (
+              <div className={clsx("flex shrink-0 flex-col gap-3", viewMode === "split" && "max-h-[45vh]")}>
+                <ExcelStyleTimeline tab={tabData} />
+                {viewMode === "timeline" && <SprintTimeline tab={tabData} />}
+              </div>
+            )}
           </>
         ) : null}
       </main>

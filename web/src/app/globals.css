@@ -1,10 +1,9 @@
 @import "tailwindcss";
-@import "../styles/frappe-gantt.css";
 
 :root {
   --sheet-border: #dadce0;
   --sheet-header-green: #188038;
-  --sheet-bg: #f8f9fa;
+  --sheet-bg: #e8eaed;
 }
 
 @theme inline {
@@ -14,44 +13,52 @@
 
 body {
   margin: 0;
-  font-family: var(--font-sans), "Google Sans", Arial, sans-serif;
+  font-family: var(--font-sans), "Google Sans", Roboto, Arial, sans-serif;
   background: var(--sheet-bg);
   color: #202124;
 }
 
 .sheet-scroll {
-  max-height: calc(100vh - 220px);
+  max-height: none;
 }
 
 .sheet-table {
   font-size: 11px;
 }
 
-.sheet-header {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-}
-
 .sheet-cell input,
 .sheet-cell select {
   font-family: inherit;
-  font-size: 11px;
+  font-size: inherit;
 }
 
-.gantt-container .bar-wrapper .bar {
-  fill: #188038;
-}
-
-.gantt-container .bar-progress {
-  fill: #81c995;
-}
-
-.sheet-tab {
-  border: 1px solid transparent;
+.sheet-tab[class*="text-\[#188038\]"] {
+  border: 1px solid var(--sheet-border);
   border-bottom: none;
 }
 
-.sheet-tab[class*="bg-white"] {
-  border-color: var(--sheet-border);
+/* gantt-task-react overrides — cleaner Excel-like palette */
+.gantt-task-wrap ._3T42e,
+.gantt-task-wrap ._3ZbQ {
+  font-family: inherit;
+}
+
+.gantt-task-wrap ._2dZTy {
+  fill: #f8f9fa;
+}
+
+.gantt-task-wrap ._3rUKi {
+  stroke: #dadce0;
+}
+
+.gantt-task-wrap ._RuwuK {
+  fill: #188038;
+}
+
+.gantt-task-wrap ._1rLuZ {
+  stroke: #137333;
+}
+
+.excel-timeline td {
+  vertical-align: middle;
 }
