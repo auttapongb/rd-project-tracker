@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import "../styles/frappe-gantt.css";
+
+:root {
+  --sheet-border: #dadce0;
+  --sheet-header-green: #188038;
+  --sheet-bg: #f8f9fa;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans), "Google Sans", Arial, sans-serif;
+  background: var(--sheet-bg);
+  color: #202124;
+}
+
+.sheet-scroll {
+  max-height: calc(100vh - 220px);
+}
+
+.sheet-table {
+  font-size: 11px;
+}
+
+.sheet-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.sheet-cell input,
+.sheet-cell select {
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.gantt-container .bar-wrapper .bar {
+  fill: #188038;
+}
+
+.gantt-container .bar-progress {
+  fill: #81c995;
+}
+
+.sheet-tab {
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+
+.sheet-tab[class*="bg-white"] {
+  border-color: var(--sheet-border);
+}

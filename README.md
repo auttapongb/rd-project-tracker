@@ -4,7 +4,7 @@ Interactive project management dashboard — parity with the Google Sheet refere
 
 ## Milestone 1 (current)
 
-Replicate these tabs with matching columns, dropdowns, colors, and layout:
+Interactive web app in `web/` with all 7 sheet tabs:
 
 - Projects
 - Sprint Resource
@@ -12,14 +12,24 @@ Replicate these tabs with matching columns, dropdowns, colors, and layout:
 - Summarize Sprint 26 / Sprint 26
 - Summarize Sprint 25 / Sprint 25
 
-Data: static seed JSON (sheet export). Atlassian integration comes in Milestone 2.
+Features: editable cells, status dropdowns, color-coded progress, Frappe Gantt on sprint tabs.
 
-## Stack (planned)
+```bash
+cd web
+npm install
+npm run dev
+```
 
-- **Frontend:** Next.js + TanStack Table + spreadsheet-style grid
-- **Gantt:** Frappe Gantt or similar OSS
-- **Backend:** Supabase (Postgres) for long-term scale
-- **Integrations:** Atlassian MCP / Jira REST (Milestone 2)
+Open http://localhost:3000
+
+Data: static seed (replace with sheet CSV export for exact parity). Atlassian sync = Milestone 2.
+
+## Stack
+
+- **Frontend:** Next.js 16 + TanStack Table + Tailwind
+- **Gantt:** Frappe Gantt
+- **Backend (planned):** Supabase
+- **Integrations (planned):** Atlassian MCP / Jira REST
 
 ## Repo
 
