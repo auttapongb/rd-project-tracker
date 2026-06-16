@@ -2,7 +2,6 @@
 
 :root {
   --sheet-border: #dadce0;
-  --sheet-header-green: #188038;
   --sheet-bg: #e8eaed;
 }
 
@@ -11,54 +10,42 @@
   --font-mono: var(--font-geist-mono);
 }
 
-body {
+html, body {
   margin: 0;
+  height: 100%;
   font-family: var(--font-sans), "Google Sans", Roboto, Arial, sans-serif;
-  background: var(--sheet-bg);
-  color: #202124;
 }
 
 .sheet-scroll {
   max-height: none;
 }
 
-.sheet-table {
-  font-size: 11px;
-}
-
 .sheet-cell input,
-.sheet-cell select {
+.sheet-cell select,
+.sheet-cell a {
   font-family: inherit;
   font-size: inherit;
 }
 
-.sheet-tab[class*="text-\[#188038\]"] {
-  border: 1px solid var(--sheet-border);
-  border-bottom: none;
+.gantt-task-wrap ._bar,
+.gantt-task-wrap ._bar-progress {
+  transition: opacity 0.15s;
 }
 
-/* gantt-task-react overrides — cleaner Excel-like palette */
-.gantt-task-wrap ._3T42e,
-.gantt-task-wrap ._3ZbQ {
-  font-family: inherit;
-}
-
-.gantt-task-wrap ._2dZTy {
-  fill: #f8f9fa;
-}
-
-.gantt-task-wrap ._3rUKi {
-  stroke: #dadce0;
-}
-
-.gantt-task-wrap ._RuwuK {
-  fill: #188038;
-}
-
-.gantt-task-wrap ._1rLuZ {
-  stroke: #137333;
+.gantt-task-wrap ._bar:hover {
+  opacity: 0.92;
 }
 
 .excel-timeline td {
   vertical-align: middle;
+}
+
+/* gantt-task-react dark tweaks */
+.dark .gantt-task-wrap ._gridBody,
+.dark .gantt-task-wrap ._taskList {
+  background: #202124 !important;
+}
+
+.dark .gantt-task-wrap text {
+  fill: #9aa0a6 !important;
 }

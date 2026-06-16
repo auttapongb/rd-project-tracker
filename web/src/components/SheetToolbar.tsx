@@ -2,18 +2,20 @@
 
 import clsx from "clsx";
 import {
+  Copy,
   Download,
   Filter,
-  Maximize2,
-  Minimize2,
+  Moon,
   Search,
+  Sun,
+  WrapText,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-
-export type SheetViewMode = "grid" | "timeline" | "split";
+import type { SheetViewMode } from "@/components/SheetToolbar.types";
 
 type Props = {
+  tabId: string;
   tabLabel: string;
   rowCount: number;
   colCount: number;
@@ -21,6 +23,10 @@ type Props = {
   onSearchChange: (v: string) => void;
   hideEmpty: boolean;
   onHideEmptyChange: (v: boolean) => void;
+  wrapText: boolean;
+  onWrapTextChange: (v: boolean) => void;
+  dark: boolean;
+  onDarkChange: (v: boolean) => void;
   zoom: number;
   onZoomChange: (v: number) => void;
   viewMode: SheetViewMode;
@@ -28,16 +34,23 @@ type Props = {
   showTimelineToggle: boolean;
   selectedCell: string | null;
   cellValue: string;
+  onFormulaChange?: (v: string) => void;
+  onFormulaCommit?: () => void;
+  canEditFormula?: boolean;
+  onCopy?: () => void;
+  onExportCsv?: () => void;
 };
 
 export function SheetToolbar({
   tabLabel,
-  rowCount,
-  colCount,
   search,
   onSearchChange,
   hideEmpty,
   onHideEmptyChange,
+  wrapText,
+  onWrapTextChange,
+  dark,
+  onDarkChange,
   zoom,
   onZoomChange,
   viewMode,
@@ -45,102 +58,90 @@ export function SheetToolbar({
   showTimelineToggle,
   selectedCell,
   cellValue,
+  onFormulaChange,
+  onFormulaCommit,
+  canEditFormula,
+  onCopy,
+  onExportCsv,
+  rowCount,
+  colCount,
 }: Props) {
   return (
-    <div className="sheet-toolbar shrink-0 border-b border-[#dadce0] bg-[#edf2fa]">
-      {/* Formula bar row */}
-      <div className="flex items-center gap-1 border-b border-[#dadce0] bg-white px-2 py-1">
-        <span className="w-14 shrink-0 text-center text-[10px] font-semibold text-[#188038]">
+    <div className={clsx("sheet-toolbar shrink-0 border-b", dark ? "border-[#3c4043] bg-[#303134]" : "border-[#dadce0] bg-[#edf2fa]")}>
+      <div className={clsx("flex items-center gap-1 border-b px-2 py-1", dark ? "border-[#3c4043] bg-[#202124]" : "border-[#dadce0] bg-white")}>
+        <span className={clsx("w-14 shrink-0 text-center text-[10px] font-semibold", dark ? "text-[#81c995]" : "text-[#188038]")}>
           {selectedCell ?? "—"}
         </span>
-        <span className="text-[#5f6368]">fx</span>
+        <span className={dark ? "text-[#9aa0a6]" : "text-[#5f6368]"}>fx</span>
         <input
-          readOnly
           value={cellValue}
-          className="min-w-0 flex-1 truncate bg-transparent px-2 text-xs text-[#202124] outline-none"
-          placeholder={`${tabLabel}`}
+          readOnly={!canEditFormula}
+          onChange={(e) => onFormulaChange?.(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onFormulaCommit?.();
+            }
+          }}
+          className={clsx(
+            "min-w-0 flex-1 truncate px-2 text-xs outline-none",
+            dark ? "bg-transparent text-[#e8eaed]" : "bg-transparent text-[#202124]",
+            canEditFormula && "ring-1 ring-[#1a73e8]",
+          )}
+          placeholder={tabLabel}
         />
       </div>
 
-      {/* Tools row */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-2">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#5f6368]" />
+          <Search className={clsx("pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2", dark ? "text-[#9aa0a6]" : "text-[#5f6368]")} />
           <input
             type="search"
             placeholder="Find in sheet…"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-7 w-44 rounded border border-[#dadce0] bg-white pl-7 pr-2 text-xs outline-none focus:border-[#188038]"
+            className={clsx(
+              "h-7 w-44 rounded border pl-7 pr-2 text-xs outline-none focus:border-[#188038]",
+              dark ? "border-[#3c4043] bg-[#202124] text-[#e8eaed]" : "border-[#dadce0] bg-white",
+            )}
           />
         </div>
 
-        <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[#5f6368]">
-          <input
-            type="checkbox"
-            checked={hideEmpty}
-            onChange={(e) => onHideEmptyChange(e.target.checked)}
-            className="rounded border-[#dadce0]"
-          />
-          <Filter className="h-3.5 w-3.5" />
-          Hide empty rows
+        <label className={clsx("flex cursor-pointer items-center gap-1.5 text-xs", dark ? "text-[#9aa0a6]" : "text-[#5f6368]")}>
+          <input type="checkbox" checked={hideEmpty} onChange={(e) => onHideEmptyChange(e.target.checked)} />
+          <Filter className="h-3.5 w-3.5" /> Hide empty
         </label>
 
-        <div className="flex items-center gap-0.5 rounded border border-[#dadce0] bg-white">
-          <button type="button" onClick={() => onZoomChange(Math.max(0.7, zoom - 0.1))} className="p-1 hover:bg-[#f1f3f4]" aria-label="Zoom out">
-            <ZoomOut className="h-3.5 w-3.5 text-[#5f6368]" />
-          </button>
-          <span className="min-w-[3rem] text-center text-[10px] text-[#5f6368]">{Math.round(zoom * 100)}%</span>
-          <button type="button" onClick={() => onZoomChange(Math.min(1.4, zoom + 0.1))} className="p-1 hover:bg-[#f1f3f4]" aria-label="Zoom in">
-            <ZoomIn className="h-3.5 w-3.5 text-[#5f6368]" />
-          </button>
+        <button type="button" onClick={() => onWrapTextChange(!wrapText)} className={clsx("flex items-center gap-1 rounded border px-2 py-1 text-xs", wrapText ? "border-[#188038] bg-[#e6f4ea] text-[#188038]" : dark ? "border-[#3c4043] text-[#9aa0a6]" : "border-[#dadce0] text-[#5f6368]")}>
+          <WrapText className="h-3.5 w-3.5" /> Wrap
+        </button>
+
+        <div className={clsx("flex items-center rounded border", dark ? "border-[#3c4043] bg-[#202124]" : "border-[#dadce0] bg-white")}>
+          <button type="button" onClick={() => onZoomChange(Math.max(0.6, zoom - 0.1))} className="p-1"><ZoomOut className="h-3.5 w-3.5" /></button>
+          <span className="min-w-[3rem] text-center text-[10px]">{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={() => onZoomChange(Math.min(1.5, zoom + 0.1))} className="p-1"><ZoomIn className="h-3.5 w-3.5" /></button>
         </div>
 
         {showTimelineToggle ? (
-          <div className="flex rounded border border-[#dadce0] bg-white text-xs">
+          <div className={clsx("flex rounded border text-xs", dark ? "border-[#3c4043]" : "border-[#dadce0]")}>
             {(["grid", "split", "timeline"] as SheetViewMode[]).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => onViewModeChange(mode)}
-                className={clsx(
-                  "px-2.5 py-1 capitalize",
-                  viewMode === mode ? "bg-[#188038] text-white" : "text-[#5f6368] hover:bg-[#f1f3f4]",
-                )}
-              >
+              <button key={mode} type="button" onClick={() => onViewModeChange(mode)} className={clsx("px-2.5 py-1 capitalize", viewMode === mode ? "bg-[#188038] text-white" : dark ? "text-[#9aa0a6]" : "text-[#5f6368]")}>
                 {mode}
               </button>
             ))}
           </div>
         ) : null}
 
-        <span className="ml-auto text-[10px] text-[#5f6368]">
-          {rowCount} rows × {colCount} cols
-        </span>
+        <button type="button" onClick={onCopy} className={clsx("rounded border p-1", dark ? "border-[#3c4043]" : "border-[#dadce0]")} title="Copy cell"><Copy className="h-3.5 w-3.5" /></button>
+        <button type="button" onClick={() => onDarkChange(!dark)} className={clsx("rounded border p-1", dark ? "border-[#3c4043]" : "border-[#dadce0]")}>
+          {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+        </button>
 
-        <button
-          type="button"
-          className="flex items-center gap-1 rounded border border-[#dadce0] bg-white px-2 py-1 text-xs text-[#5f6368] hover:bg-[#f1f3f4]"
-          title="Export CSV (browser download)"
-          onClick={() => {
-            const a = document.createElement("a");
-            a.href = `/data/${tabLabel.toLowerCase().replace(/\s+/g, "-")}.json`;
-            a.download = `${tabLabel}.json`;
-            a.click();
-          }}
-        >
-          <Download className="h-3.5 w-3.5" />
+        <span className={clsx("ml-auto text-[10px]", dark ? "text-[#9aa0a6]" : "text-[#5f6368]")}>{rowCount}×{colCount}</span>
+        <button type="button" onClick={onExportCsv} className={clsx("flex items-center gap-1 rounded border px-2 py-1 text-xs", dark ? "border-[#3c4043] text-[#9aa0a6]" : "border-[#dadce0] text-[#5f6368]")}>
+          <Download className="h-3.5 w-3.5" /> CSV
         </button>
       </div>
-    </div>
-  );
-}
-
-export function SheetCornerIcons() {
-  return (
-    <div className="flex gap-1 text-[#5f6368]">
-      <Minimize2 className="h-3 w-3 opacity-40" />
-      <Maximize2 className="h-3 w-3 opacity-40" />
     </div>
   );
 }

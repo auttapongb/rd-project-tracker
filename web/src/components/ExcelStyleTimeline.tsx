@@ -3,9 +3,9 @@
 import clsx from "clsx";
 import { useMemo } from "react";
 import { parseJiraDate } from "@/lib/sheet-utils";
-import type { ImportedTab } from "@/components/ImportedSpreadsheet";
+import type { ImportedTab } from "@/types/imported-tab";
 
-type Props = { tab: ImportedTab };
+type Props = { tab: ImportedTab; dark?: boolean };
 
 type TimelineRow = {
   key: string;
@@ -52,7 +52,7 @@ function buildRows(tab: ImportedTab): TimelineRow[] {
 }
 
 /** Excel / Sheets-style in-grid timeline (week columns + colored bars) */
-export function ExcelStyleTimeline({ tab }: Props) {
+export function ExcelStyleTimeline({ tab, dark = false }: Props) {
   const rows = useMemo(() => buildRows(tab), [tab]);
 
   const range = useMemo(() => {
@@ -73,8 +73,8 @@ export function ExcelStyleTimeline({ tab }: Props) {
   const totalMs = range.max.getTime() - range.min.getTime() + weekMs;
 
   return (
-    <div className="excel-timeline overflow-hidden rounded-md border border-[#dadce0] bg-white shadow-sm">
-      <div className="border-b border-[#dadce0] bg-[#188038] px-3 py-1.5 text-xs font-medium text-white">
+    <div className={clsx("excel-timeline overflow-hidden rounded-md border shadow-sm", dark ? "border-[#3c4043] bg-[#202124]" : "border-[#dadce0] bg-white")}>
+      <div className="border-b border-[#188038] bg-[#188038] px-3 py-1.5 text-xs font-medium text-white">
         Excel-style timeline (week columns — matches Projects tab markers)
       </div>
       <div className="overflow-auto">

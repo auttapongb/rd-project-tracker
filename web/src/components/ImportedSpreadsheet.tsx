@@ -2,83 +2,66 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { STATUS_COLORS } from "@/types/sheet";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  colLetter,
-  isTimelineMarker,
-  rowHasData,
-  TIMELINE_FILLS,
-} from "@/lib/sheet-utils";
+  buildMergeIndex,
+  isUrl,
+  resolveCellStyle,
+  selectOptionsForColumn,
+} from "@/lib/cell-style-engine";
+import { colLetter, isTimelineMarker, rowHasData } from "@/lib/sheet-utils";
+import { cellLabel, useSheetKeyboard } from "@/hooks/useSheetKeyboard";
+import type { ImportedTab } from "@/types/imported-tab";
 
-export type ImportedTab = {
-  id: string;
-  label: string;
-  headerRows: number;
-  headerColor: string;
-  selectColumnIndexes: number[];
-  columnWidths: number[];
-  rawRows: string[][];
-};
-
-const STATUS_OPTIONS = [
-  "Done", "In Progress", "To Do", "Blocked", "Closed", "Open", "In Review", "Resolved",
-];
+export type { ImportedTab };
 
 type Props = {
   tab: ImportedTab;
   zoom?: number;
   search?: string;
   hideEmpty?: boolean;
+  wrapText?: boolean;
   selected?: { r: number; c: number } | null;
   onSelect?: (cell: { r: number; c: number } | null) => void;
+  onCellChange?: (r: number, c: number, value: string) => void;
+  columnWidths?: number[];
+  onColumnWidthsChange?: (widths: number[]) => void;
+  dark?: boolean;
 };
-
-function cellStyle(
-  rowIndex: number,
-  colIndex: number,
-  value: string,
-  tab: ImportedTab,
-): React.CSSProperties {
-  if (rowIndex < tab.headerRows) {
-    return { backgroundColor: tab.headerColor, color: "#fff", fontWeight: 600 };
-  }
-  const headerRow = tab.rawRows[tab.headerRows - 1] ?? [];
-  const header = (headerRow[colIndex] ?? "").toLowerCase();
-  if (header.includes("status") && STATUS_COLORS[value]) {
-    return { backgroundColor: STATUS_COLORS[value], color: "#202124" };
-  }
-  if (value.endsWith("%") || header.includes("complete") || header.includes("capacity")) {
-    const n = parseFloat(value);
-    if (!Number.isNaN(n)) {
-      if (n >= 100) return { backgroundColor: "#b7e1cd" };
-      if (n >= 50) return { backgroundColor: "#fce8b2" };
-      if (n > 0) return { backgroundColor: "#fff2cc" };
-    }
-  }
-  return {};
-}
 
 export function ImportedSpreadsheet({
   tab,
   zoom = 1,
   search = "",
   hideEmpty = true,
+  wrapText = false,
   selected: selectedProp,
   onSelect,
+  onCellChange,
+  columnWidths: widthsProp,
+  onColumnWidthsChange,
+  dark = false,
 }: Props) {
   const [rows, setRows] = useState(tab.rawRows);
   const [selectedLocal, setSelectedLocal] = useState<{ r: number; c: number } | null>(null);
+  const [widthsLocal, setWidthsLocal] = useState(tab.columnWidths);
+  const [resizing, setResizing] = useState<{ col: number; startX: number; startW: number } | null>(null);
+  const [editing, setEditing] = useState<{ r: number; c: number } | null>(null);
+
   const selected = selectedProp ?? selectedLocal;
   const setSelected = onSelect ?? setSelectedLocal;
+  const widths = widthsProp ?? widthsLocal;
+  const setWidths = onColumnWidthsChange ?? setWidthsLocal;
   const parentRef = useRef<HTMLDivElement>(null);
 
   const colCount = useMemo(
-    () => Math.max(...rows.map((r) => r.length), tab.columnWidths.length),
-    [rows, tab.columnWidths.length],
+    () => Math.max(...rows.map((r) => r.length), widths.length),
+    [rows, widths.length],
   );
 
-  const dataRowIndices = useMemo(() => {
+  const mergeIndex = useMemo(() => buildMergeIndex(tab.merges), [tab.merges]);
+
+  const visibleRowIndices = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows
       .map((_, i) => i)
@@ -90,111 +73,194 @@ export function ImportedSpreadsheet({
       });
   }, [rows, tab.headerRows, hideEmpty, search]);
 
-  const headerIndices = dataRowIndices.filter((i) => i < tab.headerRows);
-  const bodyIndices = dataRowIndices.filter((i) => i >= tab.headerRows);
+  const headerIndices = visibleRowIndices.filter((i) => i < tab.headerRows);
+  const bodyIndices = visibleRowIndices.filter((i) => i >= tab.headerRows);
 
   const virtualizer = useVirtualizer({
     count: bodyIndices.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => Math.round(28 * zoom),
-    overscan: 12,
+    estimateSize: () => Math.round((wrapText ? 36 : 26) * zoom),
+    overscan: 15,
   });
 
-  const updateCell = useCallback((r: number, c: number, value: string) => {
-    setRows((prev) =>
-      prev.map((row, ri) =>
-        ri === r ? row.map((cell, ci) => (ci === c ? value : cell)) : row,
-      ),
-    );
-  }, []);
+  const updateCell = useCallback(
+    (r: number, c: number, value: string) => {
+      setRows((prev) =>
+        prev.map((row, ri) =>
+          ri === r ? row.map((cell, ci) => (ci === c ? value : cell)) : row,
+        ),
+      );
+      onCellChange?.(r, c, value);
+    },
+    [onCellChange],
+  );
+
+  useSheetKeyboard({
+    selected,
+    rowCount: rows.length,
+    colCount,
+    onMove: setSelected,
+    onEdit: () => {
+      if (selected) setEditing(selected);
+    },
+  });
+
+  const stickyLeft = useCallback(
+    (ci: number, isHeader: boolean) => {
+      if (ci >= tab.freezeCols && !isHeader) return undefined;
+      let left = 40;
+      for (let i = 0; i < ci; i++) left += Math.round((widths[i] ?? 90) * zoom);
+      return left;
+    },
+    [tab.freezeCols, widths, zoom],
+  );
+
+  const onResizeMove = useCallback(
+    (e: MouseEvent) => {
+      if (!resizing) return;
+      const delta = e.clientX - resizing.startX;
+      const next = [...widths];
+      next[resizing.col] = Math.max(40, resizing.startW + delta);
+      setWidths(next);
+    },
+    [resizing, setWidths, widths],
+  );
+
+  const onResizeEnd = useCallback(() => setResizing(null), []);
+
+  useEffect(() => {
+    if (!resizing) return;
+    window.addEventListener("mousemove", onResizeMove);
+    window.addEventListener("mouseup", onResizeEnd);
+    return () => {
+      window.removeEventListener("mousemove", onResizeMove);
+      window.removeEventListener("mouseup", onResizeEnd);
+    };
+  }, [resizing, onResizeMove, onResizeEnd]);
 
   const renderCell = (ri: number, ci: number) => {
+    const key = `${ri},${ci}`;
+    if (mergeIndex.covered.has(key)) return null;
+
+    const merge = mergeIndex.anchor.get(key);
     const value = rows[ri]?.[ci] ?? "";
     const isHeader = ri < tab.headerRows;
-    const isSelect = !isHeader && tab.selectColumnIndexes.includes(ci);
-    const style = cellStyle(ri, ci, value, tab);
-    const width = Math.round((tab.columnWidths[ci] ?? 90) * zoom);
+    const style = resolveCellStyle(tab, ri, ci, value);
+    const width = Math.round((widths[ci] ?? 90) * zoom);
     const isSelected = selected?.r === ri && selected?.c === ci;
+    const isEditing = editing?.r === ri && editing?.c === ci;
+    const selectOpts = selectOptionsForColumn(tab, ci);
+    const sticky = stickyLeft(ci, isHeader);
+    const isSticky = sticky !== undefined && (isHeader || ci < tab.freezeCols);
 
-    if (isTimelineMarker(value)) {
-      return (
-        <td
-          key={ci}
-          style={{ ...style, width, minWidth: width, backgroundColor: TIMELINE_FILLS[value] }}
-          className={clsx(
-            "sheet-cell border border-[#e0e0e0] p-0 text-center align-middle",
-            isSelected && "ring-2 ring-inset ring-[#1a73e8]",
-          )}
-          onClick={() => setSelected({ r: ri, c: ci })}
-        >
-          <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: TIMELINE_FILLS[value] }} />
-        </td>
-      );
-    }
-
-    return (
-      <td
-        key={ci}
-        style={{ ...style, width, minWidth: width }}
-        className={clsx(
-          "sheet-cell border border-[#e0e0e0] p-0 align-middle",
-          isSelected && "ring-2 ring-inset ring-[#1a73e8]",
-          !isHeader && ci <= 2 && "sticky z-[5] bg-white",
-          ci === 0 && !isHeader && "left-0",
-          ci === 1 && !isHeader && "left-[40px]",
-          ci === 2 && !isHeader && "left-[140px]",
-        )}
-        onClick={() => setSelected({ r: ri, c: ci })}
-      >
-        {isSelect ? (
+    const cellInner = () => {
+      if (isTimelineMarker(value)) {
+        return <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: style.backgroundColor }} title={value} />;
+      }
+      if (isUrl(value)) {
+        return (
+          <a href={value.trim()} target="_blank" rel="noreferrer" className="block truncate px-1 py-1 text-[#1a73e8] underline">
+            {value.length > 40 ? `${value.slice(0, 38)}…` : value}
+          </a>
+        );
+      }
+      if (selectOpts && !isHeader) {
+        return (
           <select
             className="h-full w-full bg-transparent px-1 py-1 outline-none"
             value={value}
             onChange={(e) => updateCell(ri, ci, e.target.value)}
           >
             <option value="">—</option>
-            {STATUS_OPTIONS.map((o) => (
+            {selectOpts.map((o) => (
               <option key={o} value={o}>{o}</option>
             ))}
-            {value && !STATUS_OPTIONS.includes(value) ? <option value={value}>{value}</option> : null}
+            {value && !selectOpts.includes(value) ? <option value={value}>{value}</option> : null}
           </select>
-        ) : (
-          <input
-            className="w-full bg-transparent px-1 py-1 outline-none"
-            value={value}
-            readOnly={isHeader}
-            onChange={(e) => updateCell(ri, ci, e.target.value)}
-          />
+        );
+      }
+      return (
+        <input
+          className={clsx("w-full bg-transparent px-1 py-1 outline-none", wrapText && "whitespace-pre-wrap")}
+          value={value}
+          readOnly={isHeader && !isEditing}
+          autoFocus={isEditing}
+          onDoubleClick={() => !isHeader && setEditing({ r: ri, c: ci })}
+          onBlur={() => setEditing(null)}
+          onChange={(e) => updateCell(ri, ci, e.target.value)}
+        />
+      );
+    };
+
+    return (
+      <td
+        key={ci}
+        colSpan={merge?.cs}
+        rowSpan={merge?.rs}
+        style={{
+          ...style,
+          width,
+          minWidth: width,
+          maxWidth: merge ? undefined : width,
+          left: isSticky ? sticky : undefined,
+        }}
+        className={clsx(
+          "sheet-cell relative border border-[#e0e0e0] p-0 align-middle",
+          dark && !style.backgroundColor && "border-[#3c4043] text-[#e8eaed]",
+          isSelected && "ring-2 ring-inset ring-[#1a73e8] z-[8]",
+          isSticky && "sticky z-[6]",
+          isSticky && !isHeader && (dark ? "bg-[#202124]" : "bg-white"),
+          wrapText && "align-top",
         )}
+        onClick={() => setSelected({ r: ri, c: ci })}
+      >
+        {cellInner()}
+        {!isHeader && ci === colCount - 1 ? null : null}
       </td>
     );
   };
 
+  const headerRowTops = useMemo(() => {
+    const h = Math.round(24 * zoom);
+    return headerIndices.map((_, i) => i * h);
+  }, [headerIndices, zoom]);
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-[#dadce0] bg-white shadow-sm">
+    <div className={clsx("flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border shadow-sm", dark ? "border-[#3c4043] bg-[#202124]" : "border-[#dadce0] bg-white")}>
       <div ref={parentRef} className="sheet-scroll flex-1 overflow-auto">
         <table className="sheet-table min-w-max border-collapse" style={{ fontSize: `${Math.round(11 * zoom)}px` }}>
           <thead>
-            <tr className="sticky top-0 z-30 bg-[#f3f3f3]">
-              <th className="sticky left-0 z-40 w-10 min-w-10 border border-[#dadce0] bg-[#f3f3f3] text-[10px] text-[#5f6368]" />
-              {Array.from({ length: colCount }, (_, ci) => (
-                <th
-                  key={ci}
-                  style={{
-                    width: Math.round((tab.columnWidths[ci] ?? 90) * zoom),
-                    minWidth: Math.round((tab.columnWidths[ci] ?? 90) * zoom),
-                  }}
-                  className="border border-[#dadce0] py-0.5 text-[10px] font-medium text-[#5f6368]"
-                >
-                  {colLetter(ci)}
-                </th>
-              ))}
+            <tr className={clsx("sticky z-40", dark ? "bg-[#303134]" : "bg-[#f3f3f3]")} style={{ top: 0 }}>
+              <th className={clsx("sticky left-0 z-50 w-10 min-w-10 border text-[10px]", dark ? "border-[#3c4043] bg-[#303134] text-[#9aa0a6]" : "border-[#dadce0] bg-[#f3f3f3] text-[#5f6368]")} />
+              {Array.from({ length: colCount }, (_, ci) => {
+                const w = Math.round((widths[ci] ?? 90) * zoom);
+                return (
+                  <th
+                    key={ci}
+                    style={{ width: w, minWidth: w, top: 0 }}
+                    className={clsx("relative border py-0.5 text-[10px] font-medium", dark ? "border-[#3c4043] text-[#9aa0a6]" : "border-[#dadce0] text-[#5f6368]")}
+                  >
+                    {colLetter(ci)}
+                    <span
+                      className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-[#1a73e8]"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setResizing({ col: ci, startX: e.clientX, startW: w });
+                      }}
+                    />
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {headerIndices.map((ri) => (
-              <tr key={`h-${ri}`}>
-                <td className="sticky left-0 z-20 w-10 border border-[#dadce0] bg-[#f3f3f3] text-center text-[10px] text-[#5f6368]">
+            {headerIndices.map((ri, hi) => (
+              <tr
+                key={`h-${ri}`}
+                className="sticky z-30"
+                style={{ top: Math.round(24 * zoom) + (headerRowTops[hi] ?? 0) }}
+              >
+                <td className={clsx("sticky left-0 z-20 w-10 border text-center text-[10px]", dark ? "border-[#3c4043] bg-[#303134] text-[#9aa0a6]" : "border-[#dadce0] bg-[#f3f3f3] text-[#5f6368]")}>
                   {ri + 1}
                 </td>
                 {Array.from({ length: colCount }, (_, ci) => renderCell(ri, ci))}
@@ -209,7 +275,7 @@ export function ImportedSpreadsheet({
               const ri = bodyIndices[vRow.index];
               return (
                 <tr key={ri} data-index={vRow.index} ref={virtualizer.measureElement}>
-                  <td className="sticky left-0 z-20 w-10 border border-[#dadce0] bg-[#f3f3f3] text-center text-[10px] text-[#5f6368]">
+                  <td className={clsx("sticky left-0 z-10 w-10 border text-center text-[10px]", dark ? "border-[#3c4043] bg-[#303134] text-[#9aa0a6]" : "border-[#dadce0] bg-[#f3f3f3] text-[#5f6368]")}>
                     {ri + 1}
                   </td>
                   {Array.from({ length: colCount }, (_, ci) => renderCell(ri, ci))}
@@ -217,11 +283,7 @@ export function ImportedSpreadsheet({
               );
             })}
             {virtualizer.getVirtualItems().length > 0 && (
-              <tr
-                style={{
-                  height: virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0),
-                }}
-              >
+              <tr style={{ height: virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0) }}>
                 <td colSpan={colCount + 1} />
               </tr>
             )}
@@ -231,3 +293,5 @@ export function ImportedSpreadsheet({
     </div>
   );
 }
+
+export { cellLabel };

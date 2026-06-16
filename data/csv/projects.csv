@@ -1,30 +1,30 @@
-,RD Projects,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,26,,27,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-#,Projects,,PM,TASK COMPLETE,Status,,Note,Month 2025 - 2026,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Month 2026 - 2027,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,Features,,,,,,,April,,,,May,,,,June,,,,July,,,,August,,,,September,,,,October,,,,November,,,,December,,,,January,,,,February,,,,March,,,,April,,,,May,,,,June,,,,July,,,,August,,,,September,,,,October,,,,November,,,,December,,,,January,,,,February,,,,March
-,Adjust,Zan,Mean,100%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,CleverTap,Jack,Mean,100%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Ecommerce Shopify,Aek,Mean,100%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,AWS Migration,A,Win,30%,In Progress,Timeline,"Dev 85%, UAT 0%, Prod 0%",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,"Thana Datamart API 
+,,RD Projects,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,26,,27,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,#,Projects,,PM,TASK COMPLETE,Status,,Note,Month 2025 - 2026,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Month 2026 - 2027,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1,Features,,,,,,,April,,,,May,,,,June,,,,July,,,,August,,,,September,,,,October,,,,November,,,,December,,,,January,,,,February,,,,March,,,,April,,,,May,,,,June,,,,July,,,,August,,,,September,,,,October,,,,November,,,,December,,,,January,,,,February,,,,March,,,
+,,Adjust,Zan,Mean,100%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,CleverTap,Jack,Mean,100%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Ecommerce Shopify,Aek,Mean,100%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,AWS Migration,A,Win,30%,In Progress,Timeline,"Dev 85%, UAT 0%, Prod 0%",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,"Thana Datamart API 
 (New Datamart)",Zan,Win,80%,In Progress,Timeline,"- Token Light Speed (Dev sp21)
 Lightspeed Token
 [5P] Create OM API Connect
 [5P] Integrate new token flow to light speed service and retest send data
 - [3P] Update mapping light speed enhancement (Dev sp21)
-- API send to CT (SA est sp21, Dev sp22)",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,dev env,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Thana City (Out of Scope OM),"Zan, Aek",Win,60%,In Progress,Timeline,"- POS transaction API ของ Light Speed 
+- API send to CT (SA est sp21, Dev sp22)",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,dev env,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Thana City (Out of Scope OM),"Zan, Aek",Win,60%,In Progress,Timeline,"- POS transaction API ของ Light Speed 
 - POS Master data (End of Feb TBC)
 - Shopify webhook and View tables",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"sa,
-dev",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Vimi Termination,"Zan, Aek",Mean,60%,In Progress,Timeline,https://docs.google.com/spreadsheets/d/1HlvYW4TgA-JaRO8mMb0kbMwip2YzqJ738MSP5CJ1sls/edit?gid=1729294108#gid=1729294108,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,api 13,,,"submit app 30/31 Mar , Release 3 April",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,New Point Engine,"Aom, Jack",Mook,15%,In Progress,Timeline,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,"Subscription Short-Distance (Support App, A920)","Aek, Zan",Mean,100%,Done,,RR App and A920 (ไม่ต้องทำแล้ว รอ confirm),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,monitoring 1 - 3 apr,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Pay with Point,"Aom, Zan",P'Pop,90%,In Progress,Timeline,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Turtle Plus member tier upgrade & downgrade,Zan,Mean,10%,In Progress,,"Upgrade ใช้ solution เดิม(ตอนนี้), Downgrade -> ทำไฟล์ run script",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,PayPoint (Point Marketplace) integration,"Zan, Aek",Mean,0%,In Progress,,Provided spec,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,SSO Migration,A,Win,0%,To Do,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Cloud Samsung,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Review App Handover document,,,0%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Unified App,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Rcash PLoan,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,Tech Debt,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+dev",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Vimi Termination,"Zan, Aek",Mean,60%,In Progress,Timeline,https://docs.google.com/spreadsheets/d/1HlvYW4TgA-JaRO8mMb0kbMwip2YzqJ738MSP5CJ1sls/edit?gid=1729294108#gid=1729294108,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,api 13,,,"submit app 30/31 Mar , Release 3 April",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,New Point Engine,"Aom, Jack",Mook,15%,In Progress,Timeline,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,"Subscription Short-Distance (Support App, A920)","Aek, Zan",Mean,100%,Done,,RR App and A920 (ไม่ต้องทำแล้ว รอ confirm),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,monitoring 1 - 3 apr,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Pay with Point,"Aom, Zan",P'Pop,90%,In Progress,Timeline,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Turtle Plus member tier upgrade & downgrade,Zan,Mean,10%,In Progress,,"Upgrade ใช้ solution เดิม(ตอนนี้), Downgrade -> ทำไฟล์ run script",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,PayPoint (Point Marketplace) integration,"Zan, Aek",Mean,0%,In Progress,,Provided spec,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,SSO Migration,A,Win,0%,To Do,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Cloud Samsung,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Review App Handover document,,,0%,Done,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Unified App,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Rcash PLoan,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Tech Debt,,,0%,In Progress,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

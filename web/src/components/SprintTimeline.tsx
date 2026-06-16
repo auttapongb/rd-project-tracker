@@ -1,18 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import clsx from "clsx";
 import { useMemo } from "react";
 import type { Task } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import { parseJiraDate, statusProgress } from "@/lib/sheet-utils";
-import type { ImportedTab } from "@/components/ImportedSpreadsheet";
+import type { ImportedTab } from "@/types/imported-tab";
 
 const Gantt = dynamic(
   () => import("gantt-task-react").then((m) => m.Gantt),
   { ssr: false, loading: () => <div className="p-4 text-xs text-[#5f6368]">Loading timeline…</div> },
 );
 
-type Props = { tab: ImportedTab };
+type Props = { tab: ImportedTab; dark?: boolean };
 
 function buildTasks(tab: ImportedTab): Task[] {
   const header = tab.rawRows[tab.headerRows - 1] ?? tab.rawRows[0] ?? [];
@@ -57,7 +58,7 @@ function buildTasks(tab: ImportedTab): Task[] {
   return tasks.slice(0, 120);
 }
 
-export function SprintTimeline({ tab }: Props) {
+export function SprintTimeline({ tab, dark = false }: Props) {
   const tasks = useMemo(() => buildTasks(tab), [tab]);
 
   if (tasks.length === 0) {
@@ -69,8 +70,8 @@ export function SprintTimeline({ tab }: Props) {
   }
 
   return (
-    <div className="gantt-task-wrap overflow-hidden rounded-md border border-[#dadce0] bg-white shadow-sm">
-      <div className="border-b border-[#dadce0] bg-[#f8f9fa] px-3 py-2 text-xs text-[#5f6368]">
+    <div className={clsx("gantt-task-wrap overflow-hidden rounded-md border shadow-sm", dark ? "border-[#3c4043] bg-[#202124]" : "border-[#dadce0] bg-white")}>
+      <div className={clsx("border-b px-3 py-2 text-xs", dark ? "border-[#3c4043] bg-[#303134] text-[#9aa0a6]" : "border-[#dadce0] bg-[#f8f9fa] text-[#5f6368]")}>
         Timeline — {tasks.length} tasks (gantt-task-react, MIT) · drag bars · zoom with toolbar
       </div>
       <div className="max-h-[420px] overflow-auto">
